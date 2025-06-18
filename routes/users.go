@@ -10,5 +10,11 @@ func UsersRoutes(rg *gin.RouterGroup) {
 	{
 		users.GET("/", controllers.GetUsers)
 		users.POST("/", controllers.CreateUser)
+
+		users.GET("/:id", controllers.GetUserByID)
+		users.PUT("/:id", controllers.UpdateUser)
+
+		users.GET("/:id/settings", controllers.GetUserSettings)
+		users.PUT("/:id/settings", controllers.UpdateUserSettings)
 	}
 }
