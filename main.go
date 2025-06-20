@@ -17,7 +17,6 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmartins9/notes-app-api/controllers"
-	"github.com/jmartins9/notes-app-api/docs"
 	"github.com/jmartins9/notes-app-api/models"
 	"github.com/jmartins9/notes-app-api/routes"
 	"github.com/swaggo/files"
@@ -46,7 +45,7 @@ func main() {
 	r := gin.Default()
 
 	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
-	
+
 	api := r.Group("/api")
 	{
 		routes.UsersRoutes(api)
