@@ -1,22 +1,9 @@
-// @title           Notes App API
-// @version         1.0
-// @description     API for a Notes Application
-// @termsOfService
-
-// @contact.name   João Martins, Miguel Braga
-// @contact.email
-
-// @license.name  MIT
-// @license.url   https://opensource.org/licenses/MIT
-
-// @host      localhost:8080
-// @BasePath  /api
-
 package main
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmartins9/notes-app-api/controllers"
+	_ "github.com/jmartins9/notes-app-api/docs"
 	"github.com/jmartins9/notes-app-api/models"
 	"github.com/jmartins9/notes-app-api/routes"
 	"github.com/swaggo/files"
@@ -26,6 +13,16 @@ import (
 	"log"
 )
 
+// @title           Notes App API
+// @version         1.0
+// @description     API for a Notes Application
+// @termsOfService https://example.com/terms
+// @contact.name   João Martins, Miguel Braga
+// @contact.email joao@exampl.com
+// @license.name  MIT
+// @license.url   https://opensource.org/licenses/MIT
+// @host      localhost:8080
+// @BasePath  /api
 func main() {
 	dsn := "host=localhost user=postgres password=postgres dbname=notesdb port=5432 sslmode=disable"
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
