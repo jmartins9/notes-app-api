@@ -1,6 +1,7 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 	"strconv"
 
@@ -15,7 +16,14 @@ func SetDatabase(db *gorm.DB) {
 	DB = db
 }
 
-// GET /users
+// GetUsers godoc
+// @Summary      List users
+// @Description  Get all registered users
+// @Tags         users
+// @Produce      json
+// @Success      200  {array}   models.User
+// @Failure      500  {object}  gin.H
+// @Router       /users [get]
 func GetUsers(c *gin.Context) {
 	var users []models.User
 	if err := DB.Find(&users).Error; err != nil {
@@ -25,7 +33,17 @@ func GetUsers(c *gin.Context) {
 	c.JSON(http.StatusOK, users)
 }
 
-// POST /users
+// CreateUser godoc
+// @Summary      Create a new user
+// @Description  Create a user with JSON payload
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        user  body      models.User  true  "User data"
+// @Success      201   {object}  models.User
+// @Failure      400   {object}  gin.H
+// @Failure      500   {object}  gin.H
+// @Router       /users [post]
 func CreateUser(c *gin.Context) {
 	var input models.User
 	if err := c.ShouldBindJSON(&input); err != nil {
@@ -41,7 +59,17 @@ func CreateUser(c *gin.Context) {
 	c.JSON(http.StatusCreated, input)
 }
 
-// GET /users/:id
+// GetUserByID godoc
+// @Summary      Get user by ID
+// @Description  Retrieve a single user using their ID
+// @Tags         users
+// @Produce      json
+// @Param        id    path      int  true  "User ID"
+// @Success      200   {object}  models.User
+// @Failure      400   {object}  gin.H
+// @Failure      404   {object}  gin.H
+// @Failure      500   {object}  gin.H
+// @Router       /users/{id} [get]
 func GetUserByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -62,7 +90,19 @@ func GetUserByID(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// PUT /users/:id
+// UpdateUser godoc
+// @Summary      Update user
+// @Description  Update user's username and photo
+// @Tags         users
+// @Accept       json
+// @Produce      json
+// @Param        id    path      int  true  "User ID"
+// @Param        user  body      object  true  "User update data"
+// @Success      200   {object}  models.User
+// @Failure      400   {object}  gin.H
+// @Failure      404   {object}  gin.H
+// @Failure      500   {object}  gin.H
+// @Router       /users/{id} [put]
 func UpdateUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
@@ -96,33 +136,84 @@ func UpdateUser(c *gin.Context) {
 	c.JSON(http.StatusOK, user)
 }
 
-// GET /users/:id/settings
+// GetUserSettings godoc
+// @Summary      Get user settings
+// @Description  Retrieve settings for a specific user
+// @Tags         settings
+// @Produce      json
+// @Param        id    path      int  true  "User ID"
+// @Success      200   {object}  models.UserSettings
+// @Failure      400   {object}  gin.H
+// @Failure      404   {object}  gin.H
+// @Failure      500   {object}  gin.H
+// @Router       /users/{id}/settings [get]
 func GetUserSettings(c *gin.Context) {
-	// Placeholder — assumes settings are stored elsewhere or attached to User model
-	id := c.Param("id")
-	c.JSON(http.StatusOK, gin.H{
-		"user_id":  id,
-		"settings": gin.H{"theme": "dark", "language": "en", "newsletter": true},
-	})
+	idParam := c.Param("id")
+	var settings models.UserSettings
+
+	id, err := strconv.ParseUint(idParam, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+
+	if err := DB.First(&settings, "user_id = ?", id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Settings not found"})
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+		}
+		return
+	}
+
+	c.JSON(http.StatusOK, settings)
 }
 
-// PUT /users/:id/settings
+// UpdateUserSettings godoc
+// @Summary      Update user settings
+// @Description  Update or create settings for a specific user
+// @Tags         settings
+// @Accept       json
+// @Produce      json
+// @Param        id       path      int                    true  "User ID"
+// @Param        settings body      models.UserSettings    true  "Settings data"
+// @Success      200      {object}  models.UserSettings
+// @Failure      400      {object}  gin.H
+// @Failure      500      {object}  gin.H
+// @Router       /users/{id}/settings [put]
 func UpdateUserSettings(c *gin.Context) {
-	id := c.Param("id")
+	idParam := c.Param("id")
 
-	var input struct {
-		Theme      string `json:"theme"`
-		Language   string `json:"language"`
-		Newsletter bool   `json:"newsletter"`
-	}
+	var input models.UserSettings
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid settings"})
 		return
 	}
 
-	// Placeholder — in real use, persist settings somewhere
-	c.JSON(http.StatusOK, gin.H{
-		"user_id":  id,
-		"settings": input,
-	})
+	id, err := strconv.ParseUint(idParam, 10, 32)
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid user ID"})
+		return
+	}
+	input.UserID = uint(id)
+
+	var existing models.UserSettings
+	if err := DB.First(&existing, "user_id = ?", id).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			if err := DB.Create(&input).Error; err != nil {
+				c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to create settings"})
+				return
+			}
+		} else {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Database error"})
+			return
+		}
+	} else {
+		if err := DB.Model(&existing).Updates(input).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to update settings"})
+			return
+		}
+	}
+
+	c.JSON(http.StatusOK, input)
 }

@@ -1,10 +1,27 @@
+// @title           Notes App API
+// @version         1.0
+// @description     API for a Notes Application
+// @termsOfService
+
+// @contact.name   João Martins, Miguel Braga
+// @contact.email
+
+// @license.name  MIT
+// @license.url   https://opensource.org/licenses/MIT
+
+// @host      localhost:8080
+// @BasePath  /api
+
 package main
 
 import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmartins9/notes-app-api/controllers"
+	"github.com/jmartins9/notes-app-api/docs"
 	"github.com/jmartins9/notes-app-api/models"
 	"github.com/jmartins9/notes-app-api/routes"
+	"github.com/swaggo/files"
+	"github.com/swaggo/gin-swagger"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
 	"log"
@@ -28,6 +45,8 @@ func main() {
 
 	r := gin.Default()
 
+	r.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
+	
 	api := r.Group("/api")
 	{
 		routes.UsersRoutes(api)
