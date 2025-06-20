@@ -22,7 +22,7 @@ func SetDatabase(db *gorm.DB) {
 // @Tags         users
 // @Produce      json
 // @Success      200  {array}   models.User
-// @Failure      500  {object}  gin.H
+// @Failure      500  {object}  models.ErrorResponse
 // @Router       /users [get]
 func GetUsers(c *gin.Context) {
 	var users []models.User
@@ -41,8 +41,8 @@ func GetUsers(c *gin.Context) {
 // @Produce      json
 // @Param        user  body      models.User  true  "User data"
 // @Success      201   {object}  models.User
-// @Failure      400   {object}  gin.H
-// @Failure      500   {object}  gin.H
+// @Failure      400   {object}  models.ErrorResponse
+// @Failure      500   {object}  models.ErrorResponse
 // @Router       /users [post]
 func CreateUser(c *gin.Context) {
 	var input models.User
@@ -66,9 +66,9 @@ func CreateUser(c *gin.Context) {
 // @Produce      json
 // @Param        id    path      int  true  "User ID"
 // @Success      200   {object}  models.User
-// @Failure      400   {object}  gin.H
-// @Failure      404   {object}  gin.H
-// @Failure      500   {object}  gin.H
+// @Failure      400   {object}  models.ErrorResponse
+// @Failure      404   {object}  models.ErrorResponse
+// @Failure      500   {object}  models.ErrorResponse
 // @Router       /users/{id} [get]
 func GetUserByID(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
@@ -99,9 +99,9 @@ func GetUserByID(c *gin.Context) {
 // @Param        id    path      int  true  "User ID"
 // @Param        user  body      object  true  "User update data"
 // @Success      200   {object}  models.User
-// @Failure      400   {object}  gin.H
-// @Failure      404   {object}  gin.H
-// @Failure      500   {object}  gin.H
+// @Failure      400   {object}  models.ErrorResponse
+// @Failure      404   {object}  models.ErrorResponse
+// @Failure      500   {object}  models.ErrorResponse
 // @Router       /users/{id} [put]
 func UpdateUser(c *gin.Context) {
 	id, err := strconv.Atoi(c.Param("id"))
@@ -143,9 +143,9 @@ func UpdateUser(c *gin.Context) {
 // @Produce      json
 // @Param        id    path      int  true  "User ID"
 // @Success      200   {object}  models.UserSettings
-// @Failure      400   {object}  gin.H
-// @Failure      404   {object}  gin.H
-// @Failure      500   {object}  gin.H
+// @Failure      400   {object}  models.ErrorResponse
+// @Failure      404   {object}  models.ErrorResponse
+// @Failure      500   {object}  models.ErrorResponse
 // @Router       /users/{id}/settings [get]
 func GetUserSettings(c *gin.Context) {
 	idParam := c.Param("id")
@@ -178,8 +178,8 @@ func GetUserSettings(c *gin.Context) {
 // @Param        id       path      int                    true  "User ID"
 // @Param        settings body      models.UserSettings    true  "Settings data"
 // @Success      200      {object}  models.UserSettings
-// @Failure      400      {object}  gin.H
-// @Failure      500      {object}  gin.H
+// @Failure      400      {object}  models.ErrorResponse
+// @Failure      500      {object}  models.ErrorResponse
 // @Router       /users/{id}/settings [put]
 func UpdateUserSettings(c *gin.Context) {
 	idParam := c.Param("id")
